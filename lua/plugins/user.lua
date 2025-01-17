@@ -31,6 +31,71 @@ return {
   },
   
   {
+    "rebelot/kanagawa.nvim", -- ensure the correct repository name
+    config = function()
+      require("kanagawa").setup({
+        compile = true,
+        undercurl = true,
+        commentStyle = { italic = true },
+        keywordStyle = { italic = true },
+        statementStyle = { bold = true },
+        transparent = false,
+        dimInactive = false,
+        terminalColors = true,
+        theme = "wave",
+        background = {
+          dark = "wave",
+          light = "lotus",
+        },
+      })
+      vim.cmd("colorscheme kanagawa") -- Apply Kanagawa theme
+    end,
+  },
+  
+  {
+    "scottmckendry/cyberdream.nvim", -- Replace "author" with the actual plugin author/repository
+    config = function()
+      require("cyberdream").setup({
+        transparent = false,         -- Enable/disable transparent background
+        italic_comments = false,     -- Enable/disable italics for comments
+        hide_fillchars = false,      -- Replace all fillchars with ' '
+        borderless_telescope = true, -- Modern borderless telescope theme
+        terminal_colors = true,      -- Set terminal colors
+        cache = false,               -- Enable/disable caching for highlights
+
+        theme = {
+          variant = "default",       -- Options: "default", "light", or "auto"
+          saturation = 1,            -- Saturation level (0 to 1)
+          highlights = {
+            -- Custom highlight groups
+            Comment = { fg = "#696969", bg = "NONE", italic = true },
+          },
+          overrides = function(colors)
+            return {
+              -- Override highlight groups
+              Comment = { fg = colors.green, bg = "NONE", italic = true },
+              ["@property"] = { fg = colors.magenta, bold = true },
+            }
+          end,
+          colors = {
+            -- Override color palette
+            bg = "#000000",
+            green = "#ffffff",
+            magenta = "#5ea1ff",
+          },
+        },
+
+        extensions = {
+          telescope = true, -- Enable Telescope integration
+          notify = true,    -- Enable notify integration
+          mini = true,      -- Enable mini.nvim integration
+        },
+      })
+      -- Apply the Cyberdream colorscheme
+      vim.cmd("colorscheme cyberdream")
+    end,
+  },
+  {
     "eddyekofo94/gruvbox-flat.nvim",
     config = function()
       vim.o.background = "dark"
@@ -264,6 +329,32 @@ return {
           },
         },
       })
+    end,
+  },
+
+  {
+    "phaazon/hop.nvim",
+    branch = "v2", -- Use the latest v2 branch
+    config = function()
+      local hop = require("hop")
+      hop.setup({ keys = "etovxqpdygfblzhckisuran" }) -- Customize keys if needed
+
+      -- Keybindings for navigation
+      vim.keymap.set("n", "<leader>fs", function()
+        hop.hint_char1({ current_line_only = true })
+      end, { desc = "Hop to symbol in current line" })
+
+      vim.keymap.set("n", "<leader>fl", function()
+        hop.hint_lines()
+      end, { desc = "Hop to line in current window" })
+
+      vim.keymap.set("n", "<leader>fw", function()
+        hop.hint_words()
+      end, { desc = "Hop to word in current window" })
+
+      vim.keymap.set("n", "<leader>fp", function()
+        hop.hint_patterns()
+      end, { desc = "Hop to pattern in current window" })
     end,
   },
 
