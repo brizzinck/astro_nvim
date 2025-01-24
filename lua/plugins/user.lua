@@ -1,6 +1,27 @@
 ---@type table
 return {
   {
+    "tpope/vim-dadbod",
+    cmd = { "DB", "DBUI", "DBUIToggle", "DBUIAddConnection" }
+  },
+
+  {
+    "kristijanhusak/vim-dadbod-ui",
+    dependencies = { "tpope/vim-dadbod" },
+    cmd = { "DBUI", "DBUIToggle" },
+    config = function()
+      vim.g.db_ui_save_location = "~/.config/nvim/db_connections"
+    end,
+  },
+
+  {
+    "kristijanhusak/vim-dadbod-completion", 
+    config = function()
+      vim.cmd([[autocmd FileType sql lua require("cmp").setup.buffer({ sources = { { name = "vim-dadbod-completion" } } })]])
+    end,
+  },
+
+  {
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",
     event = "InsertEnter",
@@ -31,7 +52,7 @@ return {
   },
   
   {
-    "rebelot/kanagawa.nvim", -- ensure the correct repository name
+    "rebelot/kanagawa.nvim", 
     config = function()
       require("kanagawa").setup({
         compile = true,
@@ -48,37 +69,34 @@ return {
           light = "lotus",
         },
       })
-      vim.cmd("colorscheme kanagawa") -- Apply Kanagawa theme
+      vim.cmd("colorscheme kanagawa") 
     end,
   },
   
   {
-    "scottmckendry/cyberdream.nvim", -- Replace "author" with the actual plugin author/repository
+    "scottmckendry/cyberdream.nvim", 
     config = function()
       require("cyberdream").setup({
-        transparent = false,         -- Enable/disable transparent background
-        italic_comments = false,     -- Enable/disable italics for comments
-        hide_fillchars = false,      -- Replace all fillchars with ' '
-        borderless_telescope = true, -- Modern borderless telescope theme
-        terminal_colors = true,      -- Set terminal colors
-        cache = false,               -- Enable/disable caching for highlights
+        transparent = false,        
+        italic_comments = false,   
+        hide_fillchars = false,   
+        borderless_telescope = true, 
+        terminal_colors = true,     
+        cache = false,               
 
         theme = {
-          variant = "default",       -- Options: "default", "light", or "auto"
-          saturation = 1,            -- Saturation level (0 to 1)
+          variant = "default",       
+          saturation = 1,           
           highlights = {
-            -- Custom highlight groups
             Comment = { fg = "#696969", bg = "NONE", italic = true },
           },
           overrides = function(colors)
             return {
-              -- Override highlight groups
               Comment = { fg = colors.green, bg = "NONE", italic = true },
               ["@property"] = { fg = colors.magenta, bold = true },
             }
           end,
           colors = {
-            -- Override color palette
             bg = "#000000",
             green = "#ffffff",
             magenta = "#5ea1ff",
@@ -86,12 +104,11 @@ return {
         },
 
         extensions = {
-          telescope = true, -- Enable Telescope integration
-          notify = true,    -- Enable notify integration
-          mini = true,      -- Enable mini.nvim integration
+          telescope = true, 
+          notify = true,   
+          mini = true,      
         },
       })
-      -- Apply the Cyberdream colorscheme
       vim.cmd("colorscheme cyberdream")
     end,
   },
@@ -334,12 +351,11 @@ return {
 
   {
     "phaazon/hop.nvim",
-    branch = "v2", -- Use the latest v2 branch
+    branch = "v2", 
     config = function()
       local hop = require("hop")
-      hop.setup({ keys = "etovxqpdygfblzhckisuran" }) -- Customize keys if needed
+      hop.setup({ keys = "etovxqpdygfblzhckisuran" }) 
 
-      -- Keybindings for navigation
       vim.keymap.set("n", "<leader>fs", function()
         hop.hint_char1({ current_line_only = true })
       end, { desc = "Hop to symbol in current line" })
