@@ -1,10 +1,72 @@
----@type table
 return {
   {
-    "tpope/vim-dadbod",
-    cmd = { "DB", "DBUI", "DBUIToggle", "DBUIAddConnection" }
+    "neovim/nvim-lspconfig",
+    config = function()
+      local lspconfig = require("lspconfig")
+
+      lspconfig.pyright.setup({})
+      lspconfig.dockerls.setup({})
+      lspconfig.docker_compose_language_service.setup({})
+      lspconfig.ts_ls.setup({
+        cmd = { "typescript-language-server", "--stdio" },
+        on_attach = function(client, bufnr)
+          local function buf_map(mode, lhs, rhs, desc)
+            vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+          end
+
+          buf_map("n", "K",         vim.lsp.buf.hover,          "Hover Documentation")
+          buf_map("n", "gd",        vim.lsp.buf.definition,     "Go to Definition")
+          buf_map("n", "gD",        vim.lsp.buf.declaration,    "Go to Declaration")
+          buf_map("n", "gi",        vim.lsp.buf.implementation, "Go to Implementation")
+          buf_map("n", "gr",        vim.lsp.buf.references,     "Find References")
+          buf_map("n", "<leader>rn",vim.lsp.buf.rename,         "Rename Symbol")
+          buf_map("n", "<leader>ca",vim.lsp.buf.code_action,    "Code Action")
+        end,
+        capabilities = lspconfig.util.default_config.capabilities,
+      })
+
+      lspconfig.gopls.setup({})
+
+      lspconfig.clangd.setup({
+        cmd = { "clangd", "--background-index", "--suggest-missing-includes" },
+        filetypes = { "c", "cpp", "objc", "objcpp" },
+      })
+
+      lspconfig.html.setup({})
+      lspconfig.cssls.setup({})
+
+      vim.diagnostic.config({
+        virtual_text = false,  
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+        float = {
+          source = "always",
+          border = "rounded",
+        },
+      })
+
+      vim.keymap.set("n", "<leader>d", function()
+        vim.diagnostic.open_float(nil, { focus = false })
+      end, { desc = "Open diagnostics float" })
+    end,
   },
 
+  {
+    "fatih/vim-go",
+    ft = "go",
+    build = ":GoUpdateBinaries",
+    config = function()
+      vim.g.go_fmt_command = "goimports"
+      vim.keymap.set("n", "<leader>gt", ":GoTest<CR>", { desc = "Run Go Test" })
+    end,
+  },
+
+  {
+    "tpope/vim-dadbod",
+    cmd = { "DB", "DBUI", "DBUIToggle", "DBUIAddConnection" },
+  },
   {
     "kristijanhusak/vim-dadbod-ui",
     dependencies = { "tpope/vim-dadbod" },
@@ -15,10 +77,17 @@ return {
   },
 
   {
-    "kristijanhusak/vim-dadbod-completion", 
+    "kristijanhusak/vim-dadbod-completion",
+    dependencies = { "kristijanhusak/vim-dadbod-ui", "tpope/vim-dadbod", "hrsh7th/nvim-cmp" },
     config = function()
-      vim.cmd([[autocmd FileType sql lua require("cmp").setup.buffer({ sources = { { name = "vim-dadbod-completion" } } })]])
+      local cmp = require("cmp")
+      cmp.setup({
+        sources = cmp.config.sources({
+          { name = "vim-dadbod-completion" }, 
+        }),
+      })
     end,
+    ft = { "sql" }, 
   },
 
   {
@@ -37,7 +106,7 @@ return {
             dismiss = "<C-e>",
           },
         },
-        panel = { 
+        panel = {
           enabled = true,
           keymap = {
             jump_prev = "[[",
@@ -50,133 +119,17 @@ return {
       })
     end,
   },
-  
-  {
-    "rebelot/kanagawa.nvim", 
-    config = function()
-      require("kanagawa").setup({
-        compile = true,
-        undercurl = true,
-        commentStyle = { italic = true },
-        keywordStyle = { italic = true },
-        statementStyle = { bold = true },
-        transparent = false,
-        dimInactive = false,
-        terminalColors = true,
-        theme = "wave",
-        background = {
-          dark = "wave",
-          light = "lotus",
-        },
-      })
-      vim.cmd("colorscheme kanagawa") 
-    end,
-  },
-  
-  {
-    "scottmckendry/cyberdream.nvim", 
-    config = function()
-      require("cyberdream").setup({
-        transparent = false,        
-        italic_comments = false,   
-        hide_fillchars = false,   
-        borderless_telescope = true, 
-        terminal_colors = true,     
-        cache = false,               
 
-        theme = {
-          variant = "default",       
-          saturation = 1,           
-          highlights = {
-            Comment = { fg = "#696969", bg = "NONE", italic = true },
-          },
-          overrides = function(colors)
-            return {
-              Comment = { fg = colors.green, bg = "NONE", italic = true },
-              ["@property"] = { fg = colors.magenta, bold = true },
-            }
-          end,
-          colors = {
-            bg = "#000000",
-            green = "#ffffff",
-            magenta = "#5ea1ff",
-          },
-        },
-
-        extensions = {
-          telescope = true, 
-          notify = true,   
-          mini = true,      
-        },
-      })
-      vim.cmd("colorscheme cyberdream")
-    end,
-  },
-  {
-    "eddyekofo94/gruvbox-flat.nvim",
+   {
+    "sainnhe/everforest",
+    lazy = false,
+    priority = 10000,
     config = function()
-      vim.o.background = "dark"
-      vim.g.gruvbox_flat_style = "hard"
-      vim.cmd("colorscheme gruvbox-flat")
-    end,
-  },
-  
-  {
-    "sainnhe/sonokai",
-    config = function()
-      vim.o.background = "dark"
-      vim.g.sonokai_style = "andromeda"
-      vim.cmd("colorscheme sonokai")
-    end,
-  },
-  
-  {
-    "shaunsingh/nord.nvim",
-    config = function()
-      vim.o.background = "dark"
-      vim.cmd("colorscheme nord")
-    end,
-  },
+      vim.o.termguicolors = true
 
-  {
-    "folke/tokyonight.nvim",
-    config = function()
-      vim.o.background = "dark"
-      vim.g.tokyonight_style = "storm"
-      vim.cmd("colorscheme tokyonight")
-    end,
-  },
-  
-  {
-    "catppuccin/nvim",
-    config = function()
-      vim.o.background = "dark"
-      vim.g.catppuccin_flavour = "macchiato"
-      vim.cmd("colorscheme catppuccin")
-    end,
-  },
+      vim.g.everforest_background = "medium"
 
-
-  {
-    "neovim/nvim-lspconfig",
-    opts = function(_, opts)
-      vim.diagnostic.config({
-        virtual_text = false,
-        signs = true,
-        underline = true,
-        update_in_insert = false,
-        severity_sort = true,
-        float = {
-          source = "always",
-          border = "rounded",
-          position = { row = 1, col = vim.o.columns - 50 },
-        },
-      })
-
-      vim.keymap.set("n", "<leader>d", function()
-        vim.diagnostic.open_float(nil, { focus = false })
-      end, { desc = "Open diagnostics float" })
-
+      vim.cmd([[colorscheme everforest]])
     end,
   },
 
@@ -186,8 +139,6 @@ return {
     dependencies = { "neovim/nvim-lspconfig" },
     config = function()
       local rt = require("rust-tools")
-      local ra = require("lspconfig")
-
       rt.setup({
         tools = {
           inlay_hints = {
@@ -202,24 +153,23 @@ return {
           on_attach = function(client, bufnr)
             local opts = { buffer = bufnr }
 
-            vim.keymap.set("n", "<leader>ra", vim.lsp.buf.code_action, opts) 
-            vim.keymap.set("n", "<leader>rr", vim.lsp.buf.rename, opts) 
-
+            vim.keymap.set("n", "<leader>ra", vim.lsp.buf.code_action, opts)
+            vim.keymap.set("n", "<leader>rr", vim.lsp.buf.rename, opts)
             vim.keymap.set("n", "<leader>rf", function()
               vim.lsp.buf.format({ async = true })
-            end, opts) 
-            vim.keymap.set("n", "<leader>rh", vim.lsp.buf.hover, opts) 
-            vim.keymap.set("n", "<leader>rs", vim.lsp.buf.signature_help, opts) 
-            vim.keymap.set("n", "<leader>rd", vim.lsp.buf.definition, opts) 
-            vim.keymap.set("n", "<leader>ri", vim.lsp.buf.implementation, opts) 
-            vim.keymap.set("n", "<leader>rR", vim.lsp.buf.references, opts) 
+            end, opts)
+            vim.keymap.set("n", "<leader>rh", vim.lsp.buf.hover, opts)
+            vim.keymap.set("n", "<leader>rs", vim.lsp.buf.signature_help, opts)
+            vim.keymap.set("n", "<leader>rd", vim.lsp.buf.definition, opts)
+            vim.keymap.set("n", "<leader>ri", vim.lsp.buf.implementation, opts)
+            vim.keymap.set("n", "<leader>rR", vim.lsp.buf.references, opts)
             vim.keymap.set("n", "<leader>rc", vim.lsp.codelens.run, opts)
 
-            vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts) 
+            vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
             vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-            vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts) 
-            vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts) 
-            vim.keymap.set("n", "K", vim.lsp.buf.hover, opts) 
+            vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+            vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+            vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 
             if client.server_capabilities.documentFormattingProvider then
               vim.api.nvim_create_autocmd("BufWritePre", {
@@ -264,6 +214,7 @@ return {
     "L3MON4D3/LuaSnip",
     config = function(plugin, opts)
       require("astronvim.plugins.configs.luasnip")(plugin, opts)
+
       local luasnip = require("luasnip")
       luasnip.filetype_extend("javascript", { "javascriptreact" })
     end,
@@ -273,25 +224,6 @@ return {
     "windwp/nvim-autopairs",
     config = function()
       require("nvim-autopairs").setup()
-    end,
-  },
-
-  {
-    "andweeb/presence.nvim",
-    config = function()
-      require("presence"):setup({
-        auto_update = true,
-        neovim_image_text = "Neovim IDE",
-        main_image = "file",
-        debounce_timeout = 10,
-        editing_text = "Editing %s",
-        file_explorer_text = "Browsing %s",
-        git_commit_text = "Committing changes",
-        plugin_manager_text = "Managing plugins",
-        reading_text = "Reading %s",
-        workspace_text = "Working on %s",
-        line_number_text = "Line %s/%s",
-      })
     end,
   },
 
@@ -319,7 +251,7 @@ return {
 
   {
     "ThePrimeagen/vim-be-good",
-    cmd = "VimBeGood", 
+    cmd = "VimBeGood",
   },
 
   {
@@ -327,7 +259,7 @@ return {
     branch = "v2.x",
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons", 
+      "nvim-tree/nvim-web-devicons",
       "MunifTanjim/nui.nvim",
     },
     config = function()
@@ -351,10 +283,10 @@ return {
 
   {
     "phaazon/hop.nvim",
-    branch = "v2", 
+    branch = "v2",
     config = function()
       local hop = require("hop")
-      hop.setup({ keys = "etovxqpdygfblzhckisuran" }) 
+      hop.setup({ keys = "etovxqpdygfblzhckisuran" })
 
       vim.keymap.set("n", "<leader>fs", function()
         hop.hint_char1({ current_line_only = true })
