@@ -4,7 +4,6 @@ return {
     config = function()
       local lspconfig = require("lspconfig")
 
-      lspconfig.pyright.setup({})
       lspconfig.dockerls.setup({})
       lspconfig.docker_compose_language_service.setup({})
       lspconfig.ts_ls.setup({
@@ -25,14 +24,69 @@ return {
         capabilities = lspconfig.util.default_config.capabilities,
       })
 
-      lspconfig.gopls.setup({})
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      capabilities.offsetEncoding = { "utf-16" }
 
-    
-      lspconfig.clangd.setup({
-        cmd = { "clangd", "--background-index", "--suggest-missing-includes", "--clang-tidy" },
-        filetypes = { "c", "cpp", "objc", "objcpp" },
-        root_dir = lspconfig.util.root_pattern("compile_commands.json", "compile_flags.txt", ".git"),
+      lspconfig.pyright.setup({
         capabilities = require("cmp_nvim_lsp").default_capabilities(),
+        on_attach = function(client, bufnr)
+          local opts = { buffer = bufnr }
+          vim.keymap.set("n", "<leader>ra", vim.lsp.buf.code_action, opts)
+          vim.keymap.set("n", "<leader>rr", vim.lsp.buf.rename, opts)
+          vim.keymap.set("n", "<leader>rf", function()
+            vim.lsp.buf.format({ async = true })
+          end, opts)
+          vim.keymap.set("n", "<leader>rh", vim.lsp.buf.hover, opts)
+          vim.keymap.set("n", "<leader>rs", vim.lsp.buf.signature_help, opts)
+          vim.keymap.set("n", "<leader>rd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "<leader>ri", vim.lsp.buf.implementation, opts)
+          vim.keymap.set("n", "<leader>rR", vim.lsp.buf.references, opts)
+          vim.keymap.set("n", "<leader>rc", vim.lsp.codelens.run, opts)
+
+          vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+          vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+          vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+        end,
+      })
+
+      lspconfig.html.setup({})
+      lspconfig.cssls.setup({})
+      lspconfig.clangd.setup({
+        cmd = { "clangd", "--background-index", "--clang-tidy" },
+        capabilities = capabilities,
+        on_attach = function(client, bufnr)
+          client.offset_encoding = "utf-16"
+          local opts = { buffer = bufnr }
+
+          vim.keymap.set("n", "<leader>ra", vim.lsp.buf.code_action, opts)
+          vim.keymap.set("n", "<leader>rr", vim.lsp.buf.rename, opts)
+          vim.keymap.set("n", "<leader>rf", function()
+            vim.lsp.buf.format({ async = true })
+          end, opts)
+          vim.keymap.set("n", "<leader>rh", vim.lsp.buf.hover, opts)
+          vim.keymap.set("n", "<leader>rs", vim.lsp.buf.signature_help, opts)
+          vim.keymap.set("n", "<leader>rd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "<leader>ri", vim.lsp.buf.implementation, opts)
+          vim.keymap.set("n", "<leader>rR", vim.lsp.buf.references, opts)
+          vim.keymap.set("n", "<leader>rc", vim.lsp.codelens.run, opts)
+
+          vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+          vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+          vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+
+          if client.server_capabilities.documentFormattingProvider then
+            vim.api.nvim_create_autocmd("BufWritePre", {
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.format({ async = false })
+              end,
+            })
+          end
+        end,
       })
 
       lspconfig.html.setup({})
@@ -57,19 +111,10 @@ return {
   },
 
   {
-    "fatih/vim-go",
-    ft = "go",
-    build = ":GoUpdateBinaries",
-    config = function()
-      vim.g.go_fmt_command = "goimports"
-      vim.keymap.set("n", "<leader>gt", ":GoTest<CR>", { desc = "Run Go Test" })
-    end,
-  },
-
-  {
     "tpope/vim-dadbod",
     cmd = { "DB", "DBUI", "DBUIToggle", "DBUIAddConnection" },
   },
+
   {
     "kristijanhusak/vim-dadbod-ui",
     dependencies = { "tpope/vim-dadbod" },
