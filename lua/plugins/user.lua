@@ -27,9 +27,12 @@ return {
 
       lspconfig.gopls.setup({})
 
+    
       lspconfig.clangd.setup({
-        cmd = { "clangd", "--background-index", "--suggest-missing-includes" },
+        cmd = { "clangd", "--background-index", "--suggest-missing-includes", "--clang-tidy" },
         filetypes = { "c", "cpp", "objc", "objcpp" },
+        root_dir = lspconfig.util.root_pattern("compile_commands.json", "compile_flags.txt", ".git"),
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
       })
 
       lspconfig.html.setup({})
