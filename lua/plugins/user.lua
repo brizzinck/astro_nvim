@@ -3,9 +3,6 @@ return {
     "neovim/nvim-lspconfig",
     config = function()
       local lspconfig = require("lspconfig")
-
-      lspconfig.dockerls.setup({})
-      lspconfig.docker_compose_language_service.setup({})
       lspconfig.ts_ls.setup({
         cmd = { "typescript-language-server", "--stdio" },
         on_attach = function(client, bufnr)
@@ -89,8 +86,50 @@ return {
         end,
       })
 
-      lspconfig.html.setup({})
-      lspconfig.cssls.setup({})
+      lspconfig.rust_analyzer.setup({
+        settings = {
+        ["rust-analyzer"] = {
+            checkOnSave = {
+              command = "clippy", 
+            },
+            diagnostics = {
+              enable = true,     
+              disabled = {},      
+            },
+          },
+        },
+
+        on_attach = function(client, bufnr)
+          local opts = { buffer = bufnr }
+
+          vim.keymap.set("n", "<leader>ra", vim.lsp.buf.code_action, opts)
+          vim.keymap.set("n", "<leader>rr", vim.lsp.buf.rename, opts)
+          vim.keymap.set("n", "<leader>rf", function()
+            vim.lsp.buf.format({ async = true })
+          end, opts)
+          vim.keymap.set("n", "<leader>rh", vim.lsp.buf.hover, opts)
+          vim.keymap.set("n", "<leader>rs", vim.lsp.buf.signature_help, opts)
+          vim.keymap.set("n", "<leader>rd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "<leader>ri", vim.lsp.buf.implementation, opts)
+          vim.keymap.set("n", "<leader>rR", vim.lsp.buf.references, opts)
+          vim.keymap.set("n", "<leader>rc", vim.lsp.codelens.run, opts)
+
+          vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+          vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+          vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+
+          if client.server_capabilities.documentFormattingProvider then
+            vim.api.nvim_create_autocmd("BufWritePre", {
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.format({ async = false })
+              end,
+            })
+          end
+        end,
+      })
 
       vim.diagnostic.config({
         virtual_text = false,  
